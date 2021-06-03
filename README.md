@@ -7,7 +7,7 @@ cuGraph benchmarking scripts.
 2. Run the benchmark scripts.  Use `python nightly/main.py --help` for details.
 
 
-## Creating a conda environment
+### Creating a conda environment
 The environment used for benchmarking cugraph can be built in any way that works for the user running the benchmarks. The only requirement is that `cugraph` can be imported and run from python.  Conda environments are an obvious choice, so the following script has been provided to create a conda env for benchmarks.  Note that the env setup step only needs to be done after a cugraph code change, or a cugraph dependency changes.
 
 On a machine with the correct compiler support and CUDA tools, run the following script:
@@ -15,8 +15,8 @@ On a machine with the correct compiler support and CUDA tools, run the following
 ./tools/create-conda-env.sh  # Creates a conda env by building cugraph and specific dependencies from source
 ```
 
-## Running benchmark scripts
-### For single-node multi-GPU runs:
+### Running benchmark scripts
+#### For single-node multi-GPU runs:
 * expose the desired GPUs to the benchmark run via `CUDA_VISIBLE_DEVICES`
 * run the benchmark script, below is an example:
 ```
@@ -24,7 +24,7 @@ python nightly/main.py --scale=23 --algo=bfs
 ```
 Use `--help` for a list of all available benchmark options.
 
-### For multi-node multi-GPU runs:
+#### For multi-node multi-GPU (MNMG) runs:
 Multi-node runs assume a NFS mount or other shared file mechanism is in place so the generated dask scheduler file can be accessed by dask workers on other nodes. For the purposes of these examples, it will be assumed that an NFS mount is available.
 
 * start the dask scheduler and the workers on a node:
@@ -57,6 +57,7 @@ node3$ conda activate cugraph_bench
 ```
 _Note: the benchmark run above may be able to be run on `node1` or `node2` above._
 
-* certain error conditions (eg. OOM) _may_ require that the workers (and possibly scheduler) are restarted.
-
-* use `nvidia-smi` on the nodes to confirm that worker processes are/are not running.
+#### Other notes for MNMG runs:
+* The scripts currently assume the InfiniBand interface is `ib0`. Change `tools/start-dask-process.sh` accordingly if `ib0` is not correct for your system.
+* Certain error conditions (eg. OOM) _may_ require that the workers (and possibly scheduler) are restarted.
+* Use `nvidia-smi` on the nodes to confirm that worker processes are/are not running.
