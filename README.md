@@ -8,7 +8,7 @@ cuGraph benchmarking scripts.
 
 
 ### Creating a conda environment
-The environment used for benchmarking cugraph can be built in any way that works for the user running the benchmarks. The only requirement is that `cugraph` can be imported and run from python.  Conda environments are an obvious choice, so the following script has been provided to create a conda env for benchmarks.  Note that the env setup step only needs to be done after a cugraph code change, or a cugraph dependency changes.
+The environment used for benchmarking cugraph can be built in any way that works for the user running the benchmarks. The only requirement is that `cugraph` can be imported and run from python.  Conda environments are an obvious choice, so the following script has been provided to create a conda env for benchmarks.  Note that the conda env creation step only needs to be done after a cugraph code change, or a cugraph dependency changes.
 
 On a machine with the correct compiler support and CUDA tools, run the following script:
 ```
@@ -25,7 +25,7 @@ python nightly/main.py --scale=23 --algo=bfs
 Use `--help` for a list of all available benchmark options.
 
 #### For multi-node multi-GPU (MNMG) runs:
-Multi-node runs assume a NFS mount or other shared file mechanism is in place so the generated dask scheduler file can be accessed by dask workers on other nodes. For the purposes of these examples, it will be assumed that an NFS mount is available.
+Multi-node runs assume a NFS mount or other shared file mechanism is in place so the generated dask scheduler file can be accessed by dask workers on other nodes. For the purposes of these examples, it will be assumed that an NFS mount is available.  The examples also assume the conda env is named `cugraph_bench`, since that is the default name used by the `tools/create-conda-env.sh` script.
 
 * start the dask scheduler and the workers on a node:
 ```
