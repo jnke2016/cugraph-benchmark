@@ -10,12 +10,12 @@ THIS_SCRIPT_DIR=${BASH_SOURCE%/*}
 # Set the CONDA_ENV env var to the desired name of the new conda
 # env. This defaults to "cugraph_bench" if unset.
 CONDA_ENV=${CONDA_ENV:=cugraph_bench}
-CUGRAPH_REPO_URL=https://github.com/rapidsai/cugraph.git
+CUGRAPH_REPO_URL="https://github.com/rapidsai/cugraph.git --branch=branch-21.08"
 DASK_REPO_URL=https://github.com/dask/dask
 DASK_DISTRIBUTED_REPO_URL=https://github.com/dask/distributed
-DASK_CUDA_REPO_URL=https://github.com/rapidsai/dask-cuda
+DASK_CUDA_REPO_URL="https://github.com/rapidsai/dask-cuda --branch=branch-21.08"
 UCX_REPO_URL=https://github.com/openucx/ucx.git
-#UCX_REPO_URL="https://github.com/openucx/ucx --branch v1.9.x"
+#UCX_REPO_URL="https://github.com/openucx/ucx --branch=v1.9.x"
 UCX_PY_REPO_URL=https://github.com/rapidsai/ucx-py.git
 BUILD_DIR=$(cd $(dirname $THIS_SCRIPT_DIR) ; pwd)/build
 
@@ -42,12 +42,12 @@ echo "removing old $CONDA_ENV env..."
 echo $(conda env remove -y --name $CONDA_ENV)
 
 # Clone repos
-cloneRepo $CUGRAPH_REPO_URL cugraph
-cloneRepo $DASK_REPO_URL dask
-cloneRepo $DASK_DISTRIBUTED_REPO_URL distributed
-cloneRepo $DASK_CUDA_REPO_URL dask-cuda
-cloneRepo $UCX_REPO_URL ucx
-cloneRepo $UCX_PY_REPO_URL ucx-py
+cloneRepo "$CUGRAPH_REPO_URL" cugraph
+cloneRepo "$DASK_REPO_URL" dask
+cloneRepo "$DASK_DISTRIBUTED_REPO_URL" distributed
+#cloneRepo "$DASK_CUDA_REPO_URL" dask-cuda
+cloneRepo "$UCX_REPO_URL" ucx
+#cloneRepo "$UCX_PY_REPO_URL" ucx-py
 
 # Create the new conda env, starting with the build tools
 conda create -y --name $CONDA_ENV python=3.8
@@ -77,7 +77,8 @@ conda install -y -n $CONDA_ENV -c conda-forge nccl=2.9.9
 
 # Remove packages that are present from the dev environment that will
 # be replaced by from-source build/installs
-conda remove -y --force dask dask-core dask-cuda distributed ucx ucx-proc ucx-py
+#conda remove -y --force dask dask-core dask-cuda distributed ucx ucx-proc ucx-py
+conda remove -y --force dask dask-core distributed ucx ucx-proc
 
 # Build UCX
 echo "Building UCX..."
@@ -112,9 +113,9 @@ cd ${BUILD_DIR}/cugraph
 ./build.sh uninstall clean libcugraph cugraph
 
 # Build UCX-Py
-echo "Building UCX-Py..."
-cd ${BUILD_DIR}/ucx-py
-python -m pip install .
+#echo "Building UCX-Py..."
+#cd ${BUILD_DIR}/ucx-py
+#python -m pip install .
 
 # Build Dask
 echo "Building Dask..."
@@ -127,6 +128,6 @@ cd ${BUILD_DIR}/distributed
 python -m pip install .
 
 # Build Dask-CUDA
-echo "Building Dask-CUDA..."
-cd ${BUILD_DIR}/dask-cuda
-python -m pip install .
+#echo "Building Dask-CUDA..."
+#cd ${BUILD_DIR}/dask-cuda
+#python -m pip install .
