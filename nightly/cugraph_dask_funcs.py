@@ -108,20 +108,15 @@ def construct_graph(dask_dataframe, symmetric=False):
 
     if len(dask_dataframe.columns) > 2:
         if symmetric: #symmetrize dask dataframe
-            dask_dataframe = dask_cudf.from_cudf(
-                symmetrize_ddf(
-                    dask_dataframe, 'src', 'dst', 'weight').compute(), npartitions=len(get_visible_devices()))
+            dask_dataframe = symmetrize_ddf(dask_dataframe, 'src', 'dst', 'weight')
 
         G.from_dask_cudf_edgelist(
             dask_dataframe, source="src", destination="dst", edge_attr="weight")
         #G.from_dask_cudf_edgelist(
         #    dask_dataframe, source="0", destination="1", edge_attr="2")
     else:
-        if symmetric: #symmetrize dask datafra
-            dask_dataframe = dask_cudf.from_cudf(
-                symmetrize_ddf(
-                    dask_dataframe, 'src', 'dst').compute(), npartitions=len(get_visible_devices()))
-        #dask_dataframe = symmetrize_ddf(dask_dataframe, 'src', 'dst')  not currently working
+        if symmetric: #symmetrize dask dataframe
+            dask_dataframe = symmetrize_ddf(dask_dataframe, 'src', 'dst')
         G.from_dask_cudf_edgelist(
             dask_dataframe, source="src", destination="dst")
 
@@ -138,7 +133,7 @@ def sssp(G, start):
 
 
 def wcc(G):
-    raise NotImplementedError
+    return cugraph.dask.weakly_connected_components(G)
 
 
 def louvain(G):

@@ -26,11 +26,11 @@ function cloneRepo {
    pushd $BUILD_DIR
    echo "Clone $repo_url in $BUILD_DIR..."
    if [ -d $repo_name ]; then
-       rm -rf $repo_name
-       if [ -d $repo_name ]; then
-           echo "ERROR: ${BUILD_DIR}/$repo_name was not completely removed."
-   	error 1
-       fi
+      rm -rf $repo_name
+      if [ -d $repo_name ]; then
+         echo "ERROR: ${BUILD_DIR}/$repo_name was not completely removed."
+         error 1
+      fi
    fi
    git clone $repo_url
    popd
@@ -71,9 +71,9 @@ conda install -y \
 
 # Install patched NCCL, needed for DGX1 (should not cause problems on
 # DGX2 or elsewhere)
-conda remove -y -n $CONDA_ENV --force nccl
-#conda install -y -n $CONDA_ENV -c nvidia/label/disable-nvb nvidia/label/disable-nvb::nccl=2.9.6.1
-conda install -y -n $CONDA_ENV -c conda-forge nccl=2.9.9
+#conda remove -y -n $CONDA_ENV --force nccl
+##conda install -y -n $CONDA_ENV -c nvidia/label/disable-nvb nvidia/label/disable-nvb::nccl=2.9.6.1
+#conda install -y -n $CONDA_ENV -c conda-forge nccl=2.9.9
 
 # Remove packages that are present from the dev environment that will
 # be replaced by from-source build/installs

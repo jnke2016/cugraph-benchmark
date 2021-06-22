@@ -44,6 +44,13 @@ class BenchmarkRun:
         # FIXME: need to accept and save individual algo args
         self.construct_graph = benchmark(construct_graph_func)
 
+        #add starting node to algos: BFS and SSSP
+        for i, algo in enumerate (algo_func_param_list):
+            if benchmark(algo).name in ["bfs", "sssp"]:
+                param={}
+                param["start"]=self.input_dataframe['src'].head()[0]
+                algo_func_param_list[i]=(algo,)+(param,)
+
         self.algos = []
         for item in algo_func_param_list:
             if type(item) is tuple:
@@ -70,7 +77,7 @@ class BenchmarkRun:
         self.results.append(result)
 
         #algos with transposed=True : PageRank, Katz
-        #algos with transposed=False: BFS . SSSP, louvain
+        #algos with transposed=False: BFS, SSSP, Louvain
         for i in range(len(self.algos)):
             if self.algos[i][0].name in ["pagerank", "katz"]: #set transpose=True when renumbering
                 if self.algos[i][0].name == "katz" and self.construct_graph.name == "from_dask_cudf_edgelist":
@@ -86,12 +93,11 @@ class BenchmarkRun:
                     self.algos[i][1]["alpha"] = katz_alpha
                 if hasattr(G, "compute_renumber_edge_list"):
                     G.compute_renumber_edge_list(transposed=True)
-            else: #set transpose=True when renumbering
+            else: #set transpose=False when renumbering
                 log("running compute_renumber_edge_list...", end="")
                 if hasattr(G, "compute_renumber_edge_list"):
                     G.compute_renumber_edge_list(transposed=False)
                 log("done.")
-  
         # FIXME: need to handle individual algo args
         for ((algo, params), validator) in zip(self.algos, self.validators):
             log(f"running {algo.name} (warmup)...", end="")

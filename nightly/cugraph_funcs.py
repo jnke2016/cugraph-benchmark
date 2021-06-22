@@ -123,7 +123,7 @@ def sssp(G, start):
 
 
 def wcc(G):
-    raise NotImplementedError
+    return cugraph.weakly_connected_components(G)
 
 
 def louvain(G):

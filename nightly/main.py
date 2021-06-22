@@ -54,10 +54,11 @@ def run(algos,
 
     # Setup the benchmarks to run based on algos specified, or all.
     # Values are either callables, or tuples of (callable, args) pairs.
-    benchmarks = {"bfs": (funcs.bfs, {"start": 1}),
-                  "sssp": (funcs.sssp, {"start": 1}),
+    benchmarks = {"bfs": funcs.bfs,
+                  "sssp": funcs.sssp,
                   "louvain": funcs.louvain,
                   "pagerank": funcs.pagerank,
+                  "wcc": funcs.wcc,
                   "katz": funcs.katz,
                  }
 
@@ -68,7 +69,7 @@ def run(algos,
                              f"{invalid_benchmarks}")
         benchmarks_to_run = [benchmarks[b] for b in algos]
     else:
-        benchmarks_to_run = benchmarks.values()
+        benchmarks_to_run = list(benchmarks.values())
 
     # Call the global setup. This is used for setting up Dask, initializing
     # output files/reports, etc.
@@ -145,3 +146,4 @@ if __name__ == "__main__":
                    dask_scheduler_file=args.dask_scheduler_file)
 
     sys.exit(exitcode)
+
