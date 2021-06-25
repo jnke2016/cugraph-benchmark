@@ -6,6 +6,20 @@
 set -e
 
 THIS_SCRIPT_DIR=${BASH_SOURCE%/*}
+NUMARGS=$#
+ARGS=$*
+function hasArg {
+    (( ${NUMARGS} != 0 )) && (echo " ${ARGS} " | grep -q " $1 ")
+}
+VALIDARGS="--from-source -h --help"
+HELP="$0 [<flag> ...]
+ where <flag> is:
+   --from-source    - build cugraph and UCX from source. This involves cloning from the respective repos,
+                      installing a full build toolchain in the conda env, applying patches, etc. Without
+                      this option, a conda env is created only from pre-built conda packages downloaded
+                      from anaconda.org channels.
+   -h | --help      - print this text
+"
 
 # Set the CONDA_ENV env var to the desired name of the new conda
 # env. This defaults to "cugraph_bench" if unset.
@@ -18,6 +32,16 @@ UCX_REPO_URL=https://github.com/openucx/ucx.git
 #UCX_REPO_URL="https://github.com/openucx/ucx --branch=v1.9.x"
 UCX_PY_REPO_URL=https://github.com/rapidsai/ucx-py.git
 BUILD_DIR=$(cd $(dirname $THIS_SCRIPT_DIR) ; pwd)/build
+
+FROM_SOURCE=0
+
+if hasArg -h || hasArg --help; then
+    echo "${HELP}"
+	exit 0
+fi
+if hasArg --from-source; then
+    FROM_SOURCE=1
+fi
 
 function cloneRepo {
    repo_url=$1
@@ -40,6 +64,23 @@ function cloneRepo {
 
 echo "removing old $CONDA_ENV env..."
 echo $(conda env remove -y --name $CONDA_ENV)
+
+# Create a conda env from nightly packages
+if [[ $FROM_SOURCE == 0 ]]; then
+    conda create -y \
+	  -n $CONDA_ENV \
+	  -c rapidsai-nightly \
+	  -c rapidsai \
+	  -c nvidia \
+	  -c conda-forge \
+	  cugraph \
+	  python=3.8 \
+	  cudatoolkit=11.0
+
+    #conda remove -y -n $CONDA_ENV --force nccl
+    #conda install -y -n $CONDA_ENV -c conda-forge nccl=2.9.9
+    exit
+fi
 
 # Clone repos
 cloneRepo "$CUGRAPH_REPO_URL" cugraph
