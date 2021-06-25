@@ -26,7 +26,7 @@ from cugraph.generators import rmat
 
 
 def generate_edgelist(scale,
-                      edgefactor=16,
+                      edgefactor,
                       seed=None,
                       unweighted=False,
 ):
@@ -103,9 +103,8 @@ def construct_graph(dask_dataframe, symmetric=False):
     loops. Multiple edges will likely be present as well.  The returned Graph
     object must be symmetrized and have self loops removed.
     """
-   
-    G = cugraph.DiGraph()
 
+    G = cugraph.DiGraph()
     if len(dask_dataframe.columns) > 2:
         if symmetric: #symmetrize dask dataframe
             dask_dataframe = symmetrize_ddf(dask_dataframe, 'src', 'dst', 'weight')
@@ -121,6 +120,7 @@ def construct_graph(dask_dataframe, symmetric=False):
             dask_dataframe, source="src", destination="dst")
 
     return G
+
 construct_graph.benchmark_name = "from_dask_cudf_edgelist"
 
 
@@ -158,7 +158,7 @@ def setup(dask_scheduler_file=None):
         # Env var UCX_MAX_RNDV_RAILS=1 must be set too.
         initialize(enable_tcp_over_ucx=True,
                    enable_nvlink=True,
-                   enable_infiniband=True,
+                   enable_infiniband=False,
                    enable_rdmacm=False,
                    #net_devices="mlx5_0:1",
                   )
@@ -178,3 +178,4 @@ def teardown(client, cluster=None):
     client.close()
     if cluster:
         cluster.close()
+

@@ -18,7 +18,7 @@ from cugraph.generators import rmat
 
 
 def generate_edgelist(scale,
-                      edgefactor=16,
+                      edgefactor,
                       seed=None,
                       unweighted=False,
                      ):

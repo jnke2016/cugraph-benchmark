@@ -15,12 +15,11 @@
 THIS_SCRIPT_DIR=${BASH_SOURCE%/*}
 
 #WEIGHTED_ALGOS="--algo=bfs --algo=sssp"
-WEIGHTED_ALGOS="--algo=bfs"
-UNWEIGHTED_ALGOS="--algo=pagerank"
+UNWEIGHTED_ALGOS="--algo=wcc"
+#UNWEIGHTED_ALGOS="--algo=pagerank"
 GPU_CONFIGS="0 0,1 0,1,2,3 0,1,2,3,4,5,6,7"
-SCALE_VALUES="23 24 25"
-#SCALE_VALUES='24'
-
+SCALE_VALUES='23 24 25 26 27 28 29 30'
+EDGEFACTOR_VALUES='16'
 
 rm -f out.csv
 
@@ -31,8 +30,12 @@ for scale in $SCALE_VALUES; do
     for gpus in $GPU_CONFIGS; do
         echo ""
         echo ">>>>>>>>  CUDA_VISIBLE_DEVICES: $gpus"
-        #env CUDA_VISIBLE_DEVICES="$gpus" python "$THIS_SCRIPT_DIR"/main.py $WEIGHTED_ALGOS --scale=$scale
-        env CUDA_VISIBLE_DEVICES="$gpus" python "$THIS_SCRIPT_DIR"/main.py $UNWEIGHTED_ALGOS --unweighted --scale=$scale
+        for edgefactor in $EDGEFACTOR_VALUES; do
+            echo ""
+            echo ">>>>>>>>>>>>>>>>> EDGEFACTOR: $edgefactor"
+            #env CUDA_VISIBLE_DEVICES="$gpus" python "$THIS_SCRIPT_DIR"/main.py $WEIGHTED_ALGOS --scale=$scale --symmetric-graph
+            env CUDA_VISIBLE_DEVICES="$gpus" python "$THIS_SCRIPT_DIR"/main.py $UNWEIGHTED_ALGOS --unweighted --symmetric-graph --scale=$scale --edgefactor=$edgefactor
+        done
     done
     mv out.csv random_scale_"$scale".csv
 done
