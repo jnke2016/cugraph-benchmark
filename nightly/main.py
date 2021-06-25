@@ -40,6 +40,7 @@ def run(algos,
         csv_results_file=None,
         unweighted=False,
         symmetric=False,
+        edgefactor=None,
         dask_scheduler_file=None):
     """
     Run the nightly benchmark on cugraph.
@@ -85,6 +86,7 @@ def run(algos,
         elif scale:
             log("running generate_edgelist (RMAT)...", end="")
             df = funcs.generate_edgelist(scale,
+                                         edgefactor=edgefactor,
                                          seed=seed,
                                          unweighted=unweighted)
             log("done.")
@@ -135,6 +137,9 @@ if __name__ == "__main__":
     ap.add_argument("--symmetric-graph", default=False, action="store_true",
                     help="Generate a symmetric (undirected) Graph instead of "
                     "a DiGraph.")
+    ap.add_argument("--edgefactor", type=int, default=16,
+                    help="edge factor for the graph edgelist generator "
+                    "(num_edges=num_verts*EDGEFACTOR).")
     args = ap.parse_args()
 
     exitcode = run(algos=args.algo,
@@ -143,7 +148,7 @@ if __name__ == "__main__":
                    csv_results_file="out.csv",
                    unweighted=args.unweighted,
                    symmetric=args.symmetric_graph,
+                   edgefactor=args.edgefactor,
                    dask_scheduler_file=args.dask_scheduler_file)
 
     sys.exit(exitcode)
-
