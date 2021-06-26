@@ -79,37 +79,70 @@ SCHEDULER_ARGS="--protocol ucx
                "
 
 WORKER_ARGS="--enable-tcp-over-ucx
-             --enable-nvlink 
+             --enable-nvlink
              --disable-infiniband
              --disable-rdmacm
              --rmm-pool-size=$WORKER_RMM_POOL_SIZE
-             --local-directory /tmp/$LOGNAME 
+             --local-directory /tmp/$LOGNAME
              --scheduler-file $SCHEDULER_FILE
             "
 #             --net-devices=ib0
 
-#echo ${SCHEDULER_ARGS}
+########################################
+scheduler_pid=""
+worker_pid=""
+num_scheduler_tries=0
+
+function startScheduler {
+    python -m distributed.cli.dask_scheduler $SCHEDULER_ARGS > ${SHARED_DIR}/logs/scheduler.log 2>&1 &
+    scheduler_pid=$!
+    echo "scheduler started."
+}
+
 if [[ $START_SCHEDULER == 1 ]]; then
     rm -f ${SCHEDULER_FILE}
     mkdir -p ${SHARED_DIR}/logs
     rm -f ${SHARED_DIR}/logs/*
-    if [[ $START_WORKERS == 1 ]]; then
-        python -m distributed.cli.dask_scheduler $SCHEDULER_ARGS > ${SHARED_DIR}/logs/scheduler.log 2>&1 &
-        while [ ! -f "$SCHEDULER_FILE" ]; do
-            echo "waiting for ${SCHEDULER_FILE}..."
-            sleep 6
-	done
-	echo "scheduler started."
-    else
-	python -m distributed.cli.dask_scheduler $SCHEDULER_ARGS > ${SHARED_DIR}/logs/scheduler.log 2>&1 &
-    fi
+
+    startScheduler
+    num_scheduler_tries=$(echo $num_scheduler_tries+1 | bc)
+
+    # Wait for the scheduler to start first before proceeding, since
+    # it may require several retries (if prior run left ports open
+    # that need time to close, for example)
+    while [ ! -f "$SCHEDULER_FILE" ]; do
+        scheduler_alive=$(ps -p $scheduler_pid > /dev/null ; echo $?)
+        if [[ $scheduler_alive != 0 ]]; then
+            if [[ $num_scheduler_tries != 30 ]]; then
+                echo "scheduler failed to start, retry #$num_scheduler_tries"
+                startScheduler
+                num_scheduler_tries=$(echo $num_scheduler_tries+1 | bc)
+            else
+                echo "could not start scheduler, exiting."
+                exit 1
+            fi
+        fi
+        echo "start-dask-process.sh: waiting for $SCHEDULER_FILE..."
+        sleep 6
+    done
 fi
 
 if [[ $START_WORKERS == 1 ]]; then
     mkdir -p ${SHARED_DIR}/logs
-    while [ ! -f "$SCHEDULER_FILE" ]; do
-            echo "$SCHEDULER_FILE not present - was the scheduler started first?"
-            sleep 6
-    done
+    if [ ! -f "$SCHEDULER_FILE" ]; then
+        echo "$SCHEDULER_FILE not present - was the scheduler started first?"
+        exit 1
+    fi
     python -m dask_cuda.cli.dask_cuda_worker $WORKER_ARGS > ${SHARED_DIR}/logs/worker-${HOSTNAME}.log 2>&1 &
+    worker_pid=$!
+    echo "worker(s) started."
+fi
+
+if [[ $worker_pid != "" ]]; then
+    echo "waiting for worker pid $worker_pid..."
+    wait $worker_pid
+fi
+if [[ $scheduler_pid != "" ]]; then
+    echo "waiting for scheduler pid $scheduler_pid..."
+    wait $scheduler_pid
 fi
