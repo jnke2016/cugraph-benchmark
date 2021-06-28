@@ -141,11 +141,14 @@ fi
 # Write out all PIDs started from this script to unique files. This allows for
 # easy cleanup by a separate script.
 mkdir -p ${SHARED_DIR}/running_pids
+WORKER_PID_FILE=${SHARED_DIR}/running_pids/worker--$(uname -n)--${worker_pid}.pid
+SCHEDULER_PID_FILE=${SHARED_DIR}/running_pids/scheduler--$(uname -n)--${scheduler_pid}.pid
+
 if [[ $worker_pid != "" ]]; then
-    echo $worker_pid > ${SHARED_DIR}/running_pids/worker-${worker_pid}.pid
+    echo $worker_pid > $WORKER_PID_FILE
 fi
 if [[ $scheduler_pid != "" ]]; then
-    echo $scheduler_pid > ${SHARED_DIR}/running_pids/scheduler-${scheduler_pid}.pid
+    echo $scheduler_pid > $SCHEDULER_PID_FILE
 fi
 
 # Make the script wait until all background processes it started are
@@ -154,10 +157,10 @@ fi
 if [[ $worker_pid != "" ]]; then
     echo "waiting for worker pid $worker_pid..."
     wait $worker_pid
-    rm -f ${SHARED_DIR}/running_pids/worker-${worker_pid}.pid
+    rm -f $WORKER_PID_FILE
 fi
 if [[ $scheduler_pid != "" ]]; then
     echo "waiting for scheduler pid $scheduler_pid..."
     wait $scheduler_pid
-    rm -f ${SHARED_DIR}/running_pids/scheduler-${scheduler_pid}.pid
+    rm -f $SCHEDULER_PID_FILE
 fi
