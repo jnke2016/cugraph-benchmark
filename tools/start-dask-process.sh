@@ -105,7 +105,7 @@ if [[ $START_SCHEDULER == 1 ]]; then
     rm -f ${SHARED_DIR}/logs/*
 
     startScheduler
-    num_scheduler_tries=$(echo $num_scheduler_tries+1 | bc)
+    num_scheduler_tries=$(python -c "print($num_scheduler_tries+1)")
 
     # Wait for the scheduler to start first before proceeding, since
     # it may require several retries (if prior run left ports open
@@ -116,7 +116,7 @@ if [[ $START_SCHEDULER == 1 ]]; then
             if [[ $num_scheduler_tries != 30 ]]; then
                 echo "scheduler failed to start, retry #$num_scheduler_tries"
                 startScheduler
-                num_scheduler_tries=$(echo $num_scheduler_tries+1 | bc)
+                num_scheduler_tries=$(python -c "print($num_scheduler_tries+1)")
             else
                 echo "could not start scheduler, exiting."
                 exit 1
