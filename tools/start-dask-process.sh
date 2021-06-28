@@ -138,11 +138,26 @@ if [[ $START_WORKERS == 1 ]]; then
     echo "worker(s) started."
 fi
 
+# Write out all PIDs started from this script to unique files. This allows for
+# easy cleanup by a separate script.
+mkdir -p ${SHARED_DIR}/running_pids
+if [[ $worker_pid != "" ]]; then
+    echo $worker_pid > ${SHARED_DIR}/running_pids/worker-${worker_pid}.pid
+fi
+if [[ $scheduler_pid != "" ]]; then
+    echo $scheduler_pid > ${SHARED_DIR}/running_pids/scheduler-${scheduler_pid}.pid
+fi
+
+# Make the script wait until all background processes it started are
+# complete. This allows for scripts that call this script to know when those
+# jobs complete when this script is not run in the background.
 if [[ $worker_pid != "" ]]; then
     echo "waiting for worker pid $worker_pid..."
     wait $worker_pid
+    rm -f ${SHARED_DIR}/running_pids/worker-${worker_pid}.pid
 fi
 if [[ $scheduler_pid != "" ]]; then
     echo "waiting for scheduler pid $scheduler_pid..."
     wait $scheduler_pid
+    rm -f ${SHARED_DIR}/running_pids/scheduler-${scheduler_pid}.pid
 fi
