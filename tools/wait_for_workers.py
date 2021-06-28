@@ -32,8 +32,10 @@ while not ready:
     with Client(scheduler_file=scheduler_file_path) as client:
         num_workers = len(client.scheduler_info()['workers'])
         if num_workers < expected_workers:
-            print(f'Expected {expected_workers} but got {num_workers}, waiting..')
+            print(f'Expected {expected_workers} but got {num_workers}, waiting...')
+            sys.stdout.flush()
             time.sleep(5)
         else:
-            print(f'Got all {num_workers} workers')
+            print(f'Got {num_workers} workers, done.')
+            sys.stdout.flush()
             ready = True
