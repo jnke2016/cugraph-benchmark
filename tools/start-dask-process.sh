@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export SHARED_DIR=${SHARED_DIR:=/gpfs/fs1/projects/sw_rapids/users/adattagupta}
+export SHARED_DIR=${SHARED_DIR:=/data/benchmark}
 WORKER_RMM_POOL_SIZE=${WORKER_RMM_POOL_SIZE:=22G}
 
 ########################################
