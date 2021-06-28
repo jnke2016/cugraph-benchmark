@@ -30,10 +30,10 @@ initialize(
 ready = False
 while not ready:
     with Client(scheduler_file=scheduler_file_path) as client:
-        workers = client.scheduler_info()['workers']
-        if len(workers) < expected_workers:
-            print(f'Expected {expected_workers} but got {len(workers)}, waiting..')
-            time.sleep(10)
+        num_workers = len(client.scheduler_info()['workers'])
+        if num_workers < expected_workers:
+            print(f'Expected {expected_workers} but got {num_workers}, waiting..')
+            time.sleep(5)
         else:
-            print(f'Got all {len(workers)} workers')
+            print(f'Got all {num_workers} workers')
             ready = True
