@@ -71,7 +71,7 @@ def run(algos,
                              f"{invalid_benchmarks}")
         benchmarks_to_run = [benchmarks[b] for b in algos]
     else:
-        benchmarks_to_run = list(benchmarks.values())
+        benchmarks_to_run = []
 
     # Call the global setup. This is used for setting up Dask, initializing
     # output files/reports, etc.
