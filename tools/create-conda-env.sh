@@ -101,7 +101,7 @@ else
     conda create -y $CONDA_NAME_OPTION python=3.8
     eval "$(conda shell.bash hook)"
     conda activate $CONDA_ENV
-    conda env update -n $CONDA_ENV --file ${BUILD_DIR}/cugraph/conda/environments/cugraph_dev_cuda11.0.yml
+    conda env update $CONDA_NAME_OPTION --file ${BUILD_DIR}/cugraph/conda/environments/cugraph_dev_cuda11.0.yml
 
     if [[ $ALL_FROM_SOURCE == 1 ]]; then
         # Clone repos
