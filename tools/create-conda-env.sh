@@ -34,7 +34,7 @@ UCX_REPO_URL=https://github.com/openucx/ucx.git
 #UCX_PY_REPO_URL=https://github.com/rapidsai/ucx-py.git
 BUILD_DIR=$(cd $(dirname $THIS_SCRIPT_DIR) ; pwd)/build
 DATE=$(date -u "+%Y%m%d%H%M%S")_UTC
-ENV_EXPORT_FILE=${BUILD_DIR}/${CONDA_ENV}-${DATE}.txt
+ENV_EXPORT_FILE=${BUILD_DIR}/$(basename ${CONDA_ENV})-${DATE}.txt
 
 ALL_FROM_SOURCE=0
 CUGRAPH_FROM_SOURCE=0
