@@ -110,7 +110,7 @@ def read_orc_dir(orc_dir):
     df = tasks[0].compute()
     meta_d = df.head()
     ddf = dask_cudf.from_delayed(tasks, meta=meta_d)
-
+    return ddf
 
 
 ################################################################################
@@ -119,7 +119,7 @@ def read_orc_dir(orc_dir):
 # The "benchmark_name" attr is used by the benchmark infra for reporting and is
 # set to assign more meaningful names to be displayed in reports.
 
-def construct_graph(dask_dataframe, symmetric=False):
+def construct_graph(dask_dataframe, symmetric=False, ignore_weights=False):
     """
     dask_dataframe contains weighted and undirected edges with self
     loops. Multiple edges will likely be present as well.  The returned Graph
@@ -127,7 +127,7 @@ def construct_graph(dask_dataframe, symmetric=False):
     """
 
     G = cugraph.DiGraph()
-    if len(dask_dataframe.columns) > 2:
+    if (ignore_weights is False) and (len(dask_dataframe.columns) > 2):
         if symmetric: #symmetrize dask dataframe
             dask_dataframe = symmetrize_ddf(dask_dataframe, 'src', 'dst', 'weight')
 

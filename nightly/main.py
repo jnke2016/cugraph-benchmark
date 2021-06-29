@@ -79,6 +79,8 @@ def run(algos,
     setup_objs = funcs.setup(dask_scheduler_file)
     log("done.")
 
+    ignore_weights = False
+
     try:
         if csv_graph_file:
             log("running read_csv...", end="")
@@ -95,12 +97,12 @@ def run(algos,
             log(f"reading ORC files from {orc_dir}...", end="")
             df = funcs.read_orc_dir(orc_dir)
             log("done.")
-
+            ignore_weights = True
         else:
             raise ValueError("Must specify scale, csv_graph_file, or orc_dir")
 
         benchmark = BenchmarkRun(df,
-                                 (funcs.construct_graph, (symmetric,)),
+                                 (funcs.construct_graph, (symmetric,ignore_weights)),
                                  benchmarks_to_run,
                                 )
         success = benchmark.run()
