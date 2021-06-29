@@ -39,6 +39,14 @@ ENV_EXPORT_FILE=${BUILD_DIR}/${CONDA_ENV}-${DATE}.txt
 ALL_FROM_SOURCE=0
 CUGRAPH_FROM_SOURCE=0
 
+# CONDA_ENV can be a name or a path. Using a path is useful for creating a conda
+# env in an alternate location (home dir, NFS dir, etc.)
+if echo $CONDA_ENV|grep -q "^/"; then
+    CONDA_NAME_OPTION="-p $CONDA_ENV"
+else
+    CONDA_NAME_OPTION="-n $CONDA_ENV"
+fi
+
 if hasArg -h || hasArg --help; then
     echo "${HELP}"
 	exit 0
@@ -70,13 +78,13 @@ function cloneRepo {
 ################################################################################
 # All options result in removing the existing env of the same name
 echo "removing old $CONDA_ENV env..."
-echo $(conda env remove -y --name $CONDA_ENV)
+echo $(conda env remove -y $CONDA_NAME_OPTION)
 
 ################################################################################
 # Create a conda env from nightly packages
 if [[ $ALL_FROM_SOURCE == 0 ]] && [[ $CUGRAPH_FROM_SOURCE == 0 ]]; then
     conda create -y \
-          -n $CONDA_ENV \
+          $CONDA_NAME_OPTION \
           -c rapidsai-nightly \
           -c rapidsai \
           -c nvidia \
@@ -90,7 +98,7 @@ if [[ $ALL_FROM_SOURCE == 0 ]] && [[ $CUGRAPH_FROM_SOURCE == 0 ]]; then
 # from source.
 else
     cloneRepo "$CUGRAPH_REPO_URL" cugraph
-    conda create -y --name $CONDA_ENV python=3.8
+    conda create -y $CONDA_NAME_OPTION python=3.8
     eval "$(conda shell.bash hook)"
     conda activate $CONDA_ENV
     conda env update -n $CONDA_ENV --file ${BUILD_DIR}/cugraph/conda/environments/cugraph_dev_cuda11.0.yml
@@ -180,5 +188,5 @@ echo "Created conda env $CONDA_ENV"
 # Dump the contents of the new enviornment if it needs to be recreated with
 # exact package versions at a later time.
 mkdir -p $BUILD_DIR
-conda list -n $CONDA_ENV --export > $ENV_EXPORT_FILE
+conda list $CONDA_NAME_OPTION --export > $ENV_EXPORT_FILE
 echo "Created $ENV_EXPORT_FILE , use \"conda create --name $CONDA_ENV --file $ENV_EXPORT_FILE\" to recreate $CONDA_ENV with exact versions."

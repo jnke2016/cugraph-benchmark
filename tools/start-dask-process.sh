@@ -94,7 +94,8 @@ worker_pid=""
 num_scheduler_tries=0
 
 function startScheduler {
-    python -m distributed.cli.dask_scheduler $SCHEDULER_ARGS > ${SHARED_DIR}/logs/scheduler.log 2>&1 &
+    python -c 'import dask ; print(f"Using dask from {dask}")' > ${SHARED_DIR}/logs/scheduler.log
+    python -m distributed.cli.dask_scheduler $SCHEDULER_ARGS >> ${SHARED_DIR}/logs/scheduler.log 2>&1 &
     scheduler_pid=$!
     echo "scheduler started."
 }
@@ -133,7 +134,8 @@ if [[ $START_WORKERS == 1 ]]; then
         echo "$SCHEDULER_FILE not present - was the scheduler started first?"
         exit 1
     fi
-    python -m dask_cuda.cli.dask_cuda_worker $WORKER_ARGS > ${SHARED_DIR}/logs/worker-${HOSTNAME}.log 2>&1 &
+    python -c 'import dask ; print(f"Using dask from {dask}")' > ${SHARED_DIR}/logs/worker-${HOSTNAME}.log
+    python -m dask_cuda.cli.dask_cuda_worker $WORKER_ARGS >> ${SHARED_DIR}/logs/worker-${HOSTNAME}.log 2>&1 &
     worker_pid=$!
     echo "worker(s) started."
 fi
