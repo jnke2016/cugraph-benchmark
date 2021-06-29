@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
+
 import numpy as np
 import dask_cudf
 from dask.distributed import Client
@@ -89,6 +91,24 @@ def read_csv(input_csv_file, scale):
                               dtype=dtypes,
                               header=None,
     )
+
+
+def read_orc_dir(orc_dir):
+    """
+    Returns a DataFrame from reading ORC files in orc_dir.
+    """
+    p = Path(orc_dir)
+    if not p.is_dir():
+        raise ValueError(f"{orc_dir} is not a directory.")
+
+    orc_files = list(p.glob("*.orc"))
+    tasks = []
+    for f in orc_files:
+        tasks.extend([delayed(cudf.read_orc)(f.absolute().as_posix())])
+    df = tasks[0].compute()
+    meta_d = df.head()
+    ddf = dask_cudf.from_delayed(tasks, meta=meta_d)
+
 
 
 ################################################################################
@@ -178,4 +198,3 @@ def teardown(client, cluster=None):
     client.close()
     if cluster:
         cluster.close()
-

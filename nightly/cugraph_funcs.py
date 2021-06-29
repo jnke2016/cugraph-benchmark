@@ -83,6 +83,13 @@ def read_csv(input_csv_file, scale):
                         )
 
 
+def read_orc_dir(orc_dir):
+    """
+    Returns a DataFrame from reading ORC files in orc_dir.
+    """
+    raise NotImplementedError
+
+
 ################################################################################
 # Benchmarked functions
 #

@@ -37,6 +37,7 @@ def log(s, end="\n"):
 def run(algos,
         scale=None,
         csv_graph_file=None,
+        orc_dir=None,
         csv_results_file=None,
         unweighted=False,
         symmetric=False,
@@ -90,8 +91,13 @@ def run(algos,
                                          seed=seed,
                                          unweighted=unweighted)
             log("done.")
+        elif orc_dir:
+            log(f"reading ORC files from {orc_dir}...", end="")
+            df = funcs.read_orc_dir(orc_dir)
+            log("done.")
+
         else:
-            raise ValueError("Must specify either scale or csv_graph_file")
+            raise ValueError("Must specify scale, csv_graph_file, or orc_dir")
 
         benchmark = BenchmarkRun(df,
                                  (funcs.construct_graph, (symmetric,)),
@@ -127,6 +133,8 @@ if __name__ == "__main__":
     ap.add_argument("--csv", type=str, default=None,
                     help="path to CSV file to read instead of generating a "
                     "graph edgelist.")
+    ap.add_argument("--orc-dir", type=str, default=None,
+                    help="directory containing ORC files to read as input.")
     ap.add_argument("--unweighted", default=False, action="store_true",
                     help="Generate a graph without weights.")
     ap.add_argument("--algo", action="append",
@@ -142,13 +150,19 @@ if __name__ == "__main__":
                     "(num_edges=num_verts*EDGEFACTOR).")
     args = ap.parse_args()
 
-    exitcode = run(algos=args.algo,
-                   scale=args.scale,
-                   csv_graph_file=args.csv,
-                   csv_results_file="out.csv",
-                   unweighted=args.unweighted,
-                   symmetric=args.symmetric_graph,
-                   edgefactor=args.edgefactor,
-                   dask_scheduler_file=args.dask_scheduler_file)
+    if [args.scale, args.csv, args.orc_dir].count(None) != 2:
+        exitcode = 1
+        log("one and only one of --scale, --csv, or --orc-dir must be "
+            "specified.")
+    else:
+        exitcode = run(algos=args.algo,
+                       scale=args.scale,
+                       csv_graph_file=args.csv,
+                       orc_dir=args.orc_dir,
+                       csv_results_file="out.csv",
+                       unweighted=args.unweighted,
+                       symmetric=args.symmetric_graph,
+                       edgefactor=args.edgefactor,
+                       dask_scheduler_file=args.dask_scheduler_file)
 
     sys.exit(exitcode)
