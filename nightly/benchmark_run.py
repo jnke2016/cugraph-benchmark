@@ -81,14 +81,16 @@ class BenchmarkRun:
         for i in range(len(self.algos)):
             if self.algos[i][0].name in ["pagerank", "katz"]: #set transpose=True when renumbering
                 if self.algos[i][0].name == "katz" and self.construct_graph.name == "from_dask_cudf_edgelist":
-                    largest_out_degree = G.out_degree().compute().\
-                    nlargest(n=1, columns="degree") #compute outdegree before renumbering because outdegree has transpose=False
-                    largest_out_degree = largest_out_degree["degree"].iloc[0]
+                    #largest_out_degree = G.out_degree().compute().\
+                    #nlargest(n=1, columns="degree") #compute outdegree before renumbering because outdegree has transpose=False
+                    #largest_out_degree = largest_out_degree["degree"].iloc[0]
+                    largest_out_degree = 16
                     katz_alpha = 1 / (largest_out_degree + 1)
                     self.algos[i][1]["alpha"] = katz_alpha
                 elif self.algos[i][0].name == "katz" and self.construct_graph.name == "from_cudf_edgelist":
-                    largest_out_degree = G.out_degree().nlargest(n=1, columns="degree")
-                    largest_out_degree = largest_out_degree["degree"].iloc[0]
+                    #largest_out_degree = G.out_degree().nlargest(n=1, columns="degree")
+                    #largest_out_degree = largest_out_degree["degree"].iloc[0]
+                    largest_out_degree = 16
                     katz_alpha = 1 / (largest_out_degree + 1)
                     self.algos[i][1]["alpha"] = katz_alpha
                 if hasattr(G, "compute_renumber_edge_list"):
