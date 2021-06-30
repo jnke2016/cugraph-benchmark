@@ -22,6 +22,7 @@ sys.path.append(str(_tools_lib_dir))
 
 from benchmark.reporting import (generate_console_report,
                                  update_csv_report,
+                                 generate_result_report,
                                 )
 
 import cugraph_funcs
@@ -42,13 +43,15 @@ def run(algos,
         unweighted=False,
         symmetric=False,
         edgefactor=None,
-        dask_scheduler_file=None):
+        dask_scheduler_file=None,
+        report_dir=None,
+        num_gpus_used=0):
     """
     Run the nightly benchmark on cugraph.
     Return True on success, False on failure.
     """
     seed = 42
-    n_gpus = len(get_visible_devices())
+    n_gpus = num_gpus_used or len(get_visible_devices())
     if (dask_scheduler_file is None) and (n_gpus < 2):
         funcs = cugraph_funcs
     else:
@@ -109,6 +112,11 @@ def run(algos,
 
         # Report results
         print(generate_console_report(benchmark.results))
+
+        if report_dir:
+            generate_result_report(report_dir, benchmark.results, n_gpus,
+                                   scale, edgefactor, orc_dir)
+
         if csv_results_file:
             update_csv_report(csv_results_file, benchmark.results, n_gpus)
 
@@ -150,6 +158,11 @@ if __name__ == "__main__":
     ap.add_argument("--edgefactor", type=int, default=16,
                     help="edge factor for the graph edgelist generator "
                     "(num_edges=num_verts*EDGEFACTOR).")
+    ap.add_argument("--report-output-dir", type=str, default=None,
+                    help="the directory the <algo>_benchmark_results.txt file "
+                    "should be written to.")
+    ap.add_argument("--num-gpus-used", type=int, default=0,
+                    help="the expected number of GPUs to be used.")
     args = ap.parse_args()
 
     if [args.scale, args.csv, args.orc_dir].count(None) != 2:
@@ -165,6 +178,8 @@ if __name__ == "__main__":
                        unweighted=args.unweighted,
                        symmetric=args.symmetric_graph,
                        edgefactor=args.edgefactor,
-                       dask_scheduler_file=args.dask_scheduler_file)
+                       dask_scheduler_file=args.dask_scheduler_file,
+                       report_dir=args.report_dir,
+                       num_gpus_used=args.num_gpus_used)
 
     sys.exit(exitcode)
