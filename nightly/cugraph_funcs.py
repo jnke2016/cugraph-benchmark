@@ -96,7 +96,7 @@ def read_orc_dir(orc_dir):
 # The "benchmark_name" attr is used by the benchmark infra for reporting and is
 # set to assign more meaningful names to be displayed in reports.
 
-def construct_graph(dask_dataframe, symmetric=False, ignore_weights=False):
+def construct_graph(dataframe, symmetric=False, ignore_weights=False):
     """
     dataframe contains weighted and undirected edges with self loops. Multiple
     edges will likely be present as well.  The returned Graph object must be

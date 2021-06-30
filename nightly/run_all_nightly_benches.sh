@@ -15,7 +15,7 @@
 THIS_SCRIPT_DIR=${BASH_SOURCE%/*}
 
 #WEIGHTED_ALGOS="--algo=bfs --algo=sssp"
-UNWEIGHTED_ALGOS="--algo=wcc"
+UNWEIGHTED_ALGOS="--algo=sssp"
 #UNWEIGHTED_ALGOS="--algo=pagerank"
 GPU_CONFIGS="0 0,1 0,1,2,3 0,1,2,3,4,5,6,7"
 SCALE_VALUES='23 24 25 26 27 28 29 30'

@@ -179,7 +179,7 @@ if __name__ == "__main__":
                        symmetric=args.symmetric_graph,
                        edgefactor=args.edgefactor,
                        dask_scheduler_file=args.dask_scheduler_file,
-                       report_dir=args.report_dir,
+                       report_dir=args.report_output_dir,
                        num_gpus_used=args.num_gpus_used)
 
     sys.exit(exitcode)

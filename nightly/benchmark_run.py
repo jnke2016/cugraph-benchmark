@@ -13,8 +13,9 @@
 
 
 from benchmark.benchmark import benchmark
-
+import numpy as np
 import sys
+
 def log(s, end="\n"):
     print(s, end=end)
     sys.stdout.flush()
@@ -70,6 +71,14 @@ class BenchmarkRun:
         self.results = []
 
         log(f"running {self.construct_graph.name}...", end="")
+        
+        for i in range(len(self.algos)):
+            if (self.algos[i][0].name == "sssp" and len(self.input_dataframe.columns)==2):#add weight to the dataset if algo=sssp
+                if self.construct_graph.name == "from_dask_cudf_edgelist":
+                    self.input_dataframe["weight"] = self.input_dataframe.map_partitions(lambda df: np.ones(len(df)))
+                else:
+                    self.input_dataframe["weight"] = np.ones(len(self.input_dataframe))
+
         result = self.construct_graph(self.input_dataframe,
                                       *self.construct_graph_func_args)
         log("done.")
@@ -81,16 +90,14 @@ class BenchmarkRun:
         for i in range(len(self.algos)):
             if self.algos[i][0].name in ["pagerank", "katz"]: #set transpose=True when renumbering
                 if self.algos[i][0].name == "katz" and self.construct_graph.name == "from_dask_cudf_edgelist":
-                    #largest_out_degree = G.out_degree().compute().\
-                    #nlargest(n=1, columns="degree") #compute outdegree before renumbering because outdegree has transpose=False
-                    #largest_out_degree = largest_out_degree["degree"].iloc[0]
-                    largest_out_degree = 16
+                    largest_out_degree = G.out_degree().compute().\
+                    nlargest(n=1, columns="degree") #compute outdegree before renumbering because outdegree has transpose=False
+                    largest_out_degree = largest_out_degree["degree"].iloc[0]
                     katz_alpha = 1 / (largest_out_degree + 1)
                     self.algos[i][1]["alpha"] = katz_alpha
                 elif self.algos[i][0].name == "katz" and self.construct_graph.name == "from_cudf_edgelist":
-                    #largest_out_degree = G.out_degree().nlargest(n=1, columns="degree")
-                    #largest_out_degree = largest_out_degree["degree"].iloc[0]
-                    largest_out_degree = 16
+                    largest_out_degree = G.out_degree().nlargest(n=1, columns="degree")
+                    largest_out_degree = largest_out_degree["degree"].iloc[0]
                     katz_alpha = 1 / (largest_out_degree + 1)
                     self.algos[i][1]["alpha"] = katz_alpha
                 if hasattr(G, "compute_renumber_edge_list"):
